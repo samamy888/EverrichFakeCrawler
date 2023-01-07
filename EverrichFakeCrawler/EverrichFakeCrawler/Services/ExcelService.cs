@@ -20,7 +20,7 @@ namespace EverrichFakeCrawler.Services
                 string folder = "Template";
                 string fileName = "template.xlsx";
                 var filepath = Path.Combine(folder, fileName);
-                var filename_new = Path.Combine(folder, "templateV2.xlsx");
+                var filename_new = Path.Combine(folder, $"{DateTime.Now.ToString("yyyy-MM-dd")}_Everrich爬蟲.xlsx");
 
                 //開檔
                 await using var fs = new FileStream(filepath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
@@ -35,8 +35,9 @@ namespace EverrichFakeCrawler.Services
                     var data = crawlerData[i];
                     var index = i + 2;
                     sheet.Cells["A" + index.ToString()].Value = data.Name.Trim(); // 名稱
-                    sheet.Cells["B" + index.ToString()].Value =  DateTime.Parse(data.Time).ToString("yyyy/MM/dd"); //日期
+                    sheet.Cells["B" + index.ToString()].Value = DateTime.Parse(data.Time).ToString("yyyy/MM/dd"); //日期
                     sheet.Cells["C" + index.ToString()].Value = data.LikeCount.Trim(); //按讚數
+                    sheet.Cells["D" + index.ToString()].Value = "連結"; //超連結
                     sheet.Cells["D" + index.ToString()].SetHyperlink(new ExcelHyperLink(data.Hyperlink));
                     sheet.Cells["D" + index.ToString()].Style.Font.UnderLine = true;
                     sheet.Cells["D" + index.ToString()].Style.Font.Color.SetColor(Color.Blue);

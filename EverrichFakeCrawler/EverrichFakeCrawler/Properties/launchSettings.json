@@ -11,7 +11,6 @@
 		"EverrichFakeCrawler": {
 			"commandName": "Project",
 			"dotnetRunMessages": true,
-			"launchBrowser": true,
 			"applicationUrl": "https://localhost:7136;http://localhost:5136",
 			"environmentVariables": {
 				"ASPNETCORE_ENVIRONMENT": "Development"

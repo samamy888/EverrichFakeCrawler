@@ -20,6 +20,9 @@ static void ConfigureServices(IServiceCollection services)
         builder.AddNLog(config.GetSection("Config/NLog.config"));
     });
 
+    services.Configure<Config>(config.GetSection("Config"));
+
+
     // add app
     services.AddScoped<App>();
     services.AddScoped<CrawlerService>();
