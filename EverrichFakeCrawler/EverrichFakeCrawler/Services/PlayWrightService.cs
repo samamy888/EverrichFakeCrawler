@@ -17,14 +17,27 @@ namespace EverrichFakeCrawler.Services
             // 取得一個 Playwright 實例 (instance)
             var playwright = await Playwright.CreateAsync();
             string playWrightPath = _config.PlayWrightPath;
-
-            return await playwright.Chromium.LaunchPersistentContextAsync(playWrightPath, new BrowserTypeLaunchPersistentContextOptions
+            try
             {
-                Headless = false,
-                SlowMo = 50,
-                ExecutablePath = Path.Combine(_config.ChromePath, "chrome.exe"),
-                Channel = "chrome",
-            });
+                return await playwright.Chromium.LaunchPersistentContextAsync(playWrightPath, new BrowserTypeLaunchPersistentContextOptions
+                {
+                    Headless = false,
+                    SlowMo = 50,
+                    ExecutablePath = Path.Combine(_config.ChromePathX86, "chrome.exe"),
+                    Channel = "chrome",
+                });
+            }
+            catch(Exception)
+            {
+                return await playwright.Chromium.LaunchPersistentContextAsync(playWrightPath, new BrowserTypeLaunchPersistentContextOptions
+                {
+                    Headless = false,
+                    SlowMo = 50,
+                    ExecutablePath = Path.Combine(_config.ChromePath, "chrome.exe"),
+                    Channel = "chrome",
+                });
+            }
+            
         }
         public async Task<IPage> GetPage()
         {

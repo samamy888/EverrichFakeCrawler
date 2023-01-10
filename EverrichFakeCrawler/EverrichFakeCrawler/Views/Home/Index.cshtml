@@ -1,0 +1,64 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+<div id="app" class="tab-wrapper">
+    <h1 class="title fadeInDown">昇恆昌反詐騙</h1>
+    <el-button id="doCrawlerButton" class="btn add-btn" type="primary" @@click="doCrawler()">開始爬取</el-button>
+</div>
+
+
+@section Scripts{
+    <script>
+        const data = {
+
+        }
+
+        const methods = {
+            doCrawler() {
+                axios({
+                    url: '/Crawler',
+                    method: 'GET',
+                    responseType: 'blob', // important
+                })
+                    .then((response) => {
+                        vm.showSuccess('爬取完成');
+                        // create file link in browser's memory
+                        const href = URL.createObjectURL(response.data);
+                        // create "a" HTML element with href to file & click
+                        const link = document.createElement('a');
+                        link.href = href;
+                        link.setAttribute('download', 'Everrich爬蟲.xlsx'); //or any other extension
+                        document.body.appendChild(link);
+                        link.click();
+
+                        // clean up "a" element & remove ObjectURL
+                        document.body.removeChild(link);
+                        URL.revokeObjectURL(href);
+                    })
+                    .catch(({ response }) => {
+                        vm.showError(response.data);
+                    });
+            },
+            showSuccess(message) {
+                this.$message({
+                    message: message,
+                    type: 'success'
+                });
+            },
+            showError(message) {
+                this.$message.error(message);
+            },
+        }
+        const mounted = function() {
+            //$('#doCrawlerButton').click();
+        }
+        const vue = {
+            el: '#app',
+            data: data,
+            methods: methods,
+            mounted: mounted,
+        }
+        const vm = new Vue(vue)
+    </script>
+}
+

@@ -20,7 +20,7 @@ namespace EverrichFakeCrawler.Services
                 string folder = "Template";
                 string fileName = "template.xlsx";
                 var filepath = Path.Combine(folder, fileName);
-                var filename_new = Path.Combine(folder, $"{DateTime.Now.ToString("yyyy-MM-dd")}_Everrich爬蟲.xlsx");
+                var filename_new = Path.Combine(folder, "templateV2.xlsx");
 
                 //開檔
                 await using var fs = new FileStream(filepath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);

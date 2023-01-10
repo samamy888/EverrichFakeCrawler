@@ -1,4 +1,4 @@
-﻿{
+{
 	"iisSettings": {
 		"windowsAuthentication": false,
 		"anonymousAuthentication": true,
@@ -8,13 +8,21 @@
 		}
 	},
 	"profiles": {
+		"Electron.NET App": {
+			"commandName": "Executable",
+			"executablePath": "electronize",
+			"commandLineArgs": "start /PublishSingleFile false",
+			"workingDirectory": "."
+		},
+
 		"EverrichFakeCrawler": {
 			"commandName": "Project",
-			"dotnetRunMessages": true,
-			"applicationUrl": "https://localhost:7136;http://localhost:5136",
+			"launchBrowser": true,
 			"environmentVariables": {
 				"ASPNETCORE_ENVIRONMENT": "Development"
-			}
+			},
+			"applicationUrl": "https://localhost:7201;http://localhost:5201",
+			"dotnetRunMessages": true
 		},
 		"IIS Express": {
 			"commandName": "IISExpress",

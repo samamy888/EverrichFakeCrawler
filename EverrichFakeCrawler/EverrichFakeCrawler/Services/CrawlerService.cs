@@ -24,9 +24,7 @@ namespace EverrichFakeCrawler.Services
             var nameEval = "[...document.querySelectorAll('table tr td:nth-child(2) a div div')].filter(x=>x.innerText.includes('昇恆昌') || x.innerText.includes('昇恒昌')).map(x=>x.innerText)";
             var page = await _playWrightService.GetPage();
             //先到搜尋頁
-            await page.GotoAsync("https://mbasic.facebook.com/search/top/?q=%E6%98%87%E6%81%86%E6%98%8C");
-            //第一個一定是粉絲專頁
-            await page.Locator("text=查看全部").First.ClickAsync();
+            await page.GotoAsync("https://mbasic.facebook.com/search/pages/?q=%E6%98%87%E6%81%86%E6%98%8C");
 
             //找齊所有昇恆昌的資料
             while (true)
@@ -49,9 +47,9 @@ namespace EverrichFakeCrawler.Services
                     result.Add(item);
                 }
 
-                var 查看更多 =  await page.Locator("text=查看更多結果").CountAsync();
+                var 查看更多 = await page.Locator("text=查看更多結果").CountAsync();
 
-                if(查看更多 > 0)
+                if (查看更多 > 0)
                 {
                     await page.Locator("text=查看更多結果").First.ClickAsync();
                 }
@@ -62,13 +60,12 @@ namespace EverrichFakeCrawler.Services
             {
                 var url = result[i].Hyperlink;
                 await page.GotoAsync(url);
-                var likeCount = string.Empty;
+                var likeCount = "0";
                 var 粉絲專業 = (await page.Locator("text=/.+個讚/").CountAsync()) > 0;
                 var 地標 = (await page.Locator("text=/.+人說這讚/").CountAsync()) > 0;
                 if (粉絲專業)
                 {
                     likeCount = await page.InnerTextAsync("text=/.+個讚/", new PageInnerTextOptions { Timeout = 1000 });
-
                 }
                 if (地標)
                 {
@@ -79,17 +76,21 @@ namespace EverrichFakeCrawler.Services
                 result[i].Hyperlink = page.Url;
             }
 
+            await _playWrightService.ClosePage();
+
             //按讚數排序
-            result = result.OrderBy(x => x.LikeCount).ToList();
+            result = result.OrderBy(x => Decimal.Parse(x.LikeCount.Replace(",", ""))).ToList();
             return result;
         }
         private string LikeCountParse(string count)
         {
             return count
                 .Replace("說這讚", "")
+                .Replace("說讚", "")
                 .Replace("個讚", "")
                 .Replace("萬", "0,000")
                 .Replace("人", "")
+                .Replace(" ", "")
                 .Trim();
         }
         private async Task<T> GetJsonElement<T>(IPage page, string eval)
