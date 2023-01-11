@@ -51,7 +51,6 @@ Task.Run(async () =>
     new BrowserWindowOptions
     {
         Title = "ª@«í©÷¤Ï¶BÄF",
-        Width = 500,
         Height = 500
     });
 });

@@ -16,7 +16,7 @@ namespace EverrichFakeCrawler.Services
             _logger = logger;
             _playWrightService = playWrightService;
         }
-        public async Task<List<CrawlerModel>> DoCrawler()
+        public async Task<List<CrawlerModel>> DoCrawler(JC_PTTLogin.Models.CrawlerRequest request)
         {
             var result = new List<CrawlerModel>();
             //取得有昇恆昌字眼的文字 再去取連結
@@ -25,6 +25,35 @@ namespace EverrichFakeCrawler.Services
             var page = await _playWrightService.GetPage();
             //先到搜尋頁
             await page.GotoAsync("https://mbasic.facebook.com/search/pages/?q=%E6%98%87%E6%81%86%E6%98%8C");
+
+            #region login
+            var isLogin = await (page.Locator("text=加入 Facebook 或登入以繼續。").CountAsync());
+
+            if (isLogin > 0)
+            {
+                try
+                {
+                    await page.GotoAsync("https://www.facebook.com/login/device-based/regular/login/?login_attempt=1");
+                    await page.Locator("#email").FillAsync(request.AccountId);
+                    await page.Locator("#pass").FillAsync(request.Password);
+                    await page.Locator("#loginbutton").ClickAsync();
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError($"登入失敗 : {ex.Message}");
+                    return new List<CrawlerModel>();
+                }
+            }
+            //如果目前的URL還是要登入代表失敗
+            var nowUrl = page.Url;
+            if (nowUrl.ToLower().Contains("login"))
+            {
+                _logger.LogError($"登入失敗");
+                return new List<CrawlerModel>();
+            }
+            // 再回到一開始
+            await page.GotoAsync("https://mbasic.facebook.com/search/pages/?q=%E6%98%87%E6%81%86%E6%98%8C");
+            #endregion
 
             //找齊所有昇恆昌的資料
             while (true)

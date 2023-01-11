@@ -12,9 +12,9 @@ namespace EverrichFakeCrawler.Services
             _service = service;
             _excelService = excelService;
         }
-        public async Task<ExcelResponse> Run()
+        public async Task<ExcelResponse> Run(JC_PTTLogin.Models.CrawlerRequest request)
         {
-            var list = await _service.DoCrawler();
+            var list = await _service.DoCrawler(request);
 
             if (list.Count <= 0)
                 return null;

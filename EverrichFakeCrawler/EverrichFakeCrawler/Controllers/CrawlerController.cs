@@ -1,4 +1,5 @@
 ﻿using EverrichFakeCrawler.Services;
+using JC_PTTLogin.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EverrichFakeCrawler.Controllers
@@ -7,16 +8,19 @@ namespace EverrichFakeCrawler.Controllers
     [Route("[controller]")]
     public class CrawlerController : Controller
     {
+        private readonly ILogger<CrawlerController> _logger;
         private readonly MainService _mainServices;
 
         public CrawlerController(ILogger<CrawlerController> logger, MainService mainService)
         {
+            _logger = logger;
             _mainServices = mainService;
         }
-        [HttpGet]
-        public async Task<IActionResult> Index()
+        [HttpPost]
+        public async Task<IActionResult> Index([FromBody]CrawlerRequest request)
         {
-            var excelResponse = await _mainServices.Run();
+            _logger.LogInformation("開始爬蟲");
+            var excelResponse = await _mainServices.Run(request);
             if(excelResponse.Data == null)
                 return BadRequest($"輸出Excel失敗 , 原因 : {excelResponse.Msg}");
 

@@ -1,11 +1,8 @@
 html {
 	position: relative;
-	background: -moz-linear-gradient(360deg, #dbbee7 0%, #a375c7 100%);
-	background: -webkit-linear-gradient(360deg, #dbbee7 0%, #a375c7 100%);
 }
 
 body {
-	background-color: #fff0;
 }
 /* global */
 .text-right {
@@ -625,3 +622,6 @@ body {
 	}
 }
 
+.box-card {
+	background-color:black;
+}
