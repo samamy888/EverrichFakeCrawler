@@ -17,7 +17,7 @@ namespace EverrichFakeCrawler.Services
             var list = await _service.DoCrawler(request);
 
             if (list.Count <= 0)
-                return null;
+                return new ExcelResponse();
 
             return await _excelService.ExportExcelBuffer(list);
         }

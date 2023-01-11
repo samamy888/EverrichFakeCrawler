@@ -3,6 +3,7 @@ using EverrichFakeCrawler.Models;
 using Microsoft.Extensions.Options;
 using Microsoft.Playwright;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 
 namespace EverrichFakeCrawler.Services
 {
@@ -20,11 +21,12 @@ namespace EverrichFakeCrawler.Services
         {
             var result = new List<CrawlerModel>();
             //取得有昇恆昌字眼的文字 再去取連結
-            var hrefEval = "[...document.querySelectorAll('table tr td:nth-child(2) a')].filter(x=>x.innerText.includes('昇恆昌') || x.innerText.includes('昇恒昌')).map(x=>x.href)";
-            var nameEval = "[...document.querySelectorAll('table tr td:nth-child(2) a div div')].filter(x=>x.innerText.includes('昇恆昌') || x.innerText.includes('昇恒昌')).map(x=>x.innerText)";
+            var hrefEval = GetHrefEvalString(request.Keyword);
+            var nameEval = GetNameEvalString(request.Keyword);
             var page = await _playWrightService.GetPage();
+            var searchUrl = $"https://mbasic.facebook.com/search/pages/?q={request.Keyword}";
             //先到搜尋頁
-            await page.GotoAsync("https://mbasic.facebook.com/search/pages/?q=%E6%98%87%E6%81%86%E6%98%8C");
+            await page.GotoAsync(searchUrl);
 
             #region login
             var isLogin = await (page.Locator("text=加入 Facebook 或登入以繼續。").CountAsync());
@@ -52,7 +54,7 @@ namespace EverrichFakeCrawler.Services
                 return new List<CrawlerModel>();
             }
             // 再回到一開始
-            await page.GotoAsync("https://mbasic.facebook.com/search/pages/?q=%E6%98%87%E6%81%86%E6%98%8C");
+            await page.GotoAsync(searchUrl);
             #endregion
 
             //找齊所有昇恆昌的資料
@@ -69,7 +71,7 @@ namespace EverrichFakeCrawler.Services
                     var item = new CrawlerModel()
                     {
                         Name = nameData[i],
-                        Hyperlink = hrefData[i].Replace("mbasic", "www"),
+                        Hyperlink = UrlParse(hrefData[i].Replace("mbasic", "www")),
                         Time = DateTime.Now.ToString(),
                         LikeCount = "0",
                     };
@@ -90,9 +92,9 @@ namespace EverrichFakeCrawler.Services
                 var url = result[i].Hyperlink;
                 await page.GotoAsync(url);
                 var likeCount = "0";
-                var 粉絲專業 = (await page.Locator("text=/.+個讚/").CountAsync()) > 0;
-                var 地標 = (await page.Locator("text=/.+人說這讚/").CountAsync()) > 0;
-                if (粉絲專業)
+                var 粉絲專頁 = (await page.Locator("text=/.+個讚/").CountAsync()) > 0;
+                var 地標 = (await page.Locator("text=/.+人說這?讚/").CountAsync()) > 0;
+                if (粉絲專頁)
                 {
                     likeCount = await page.InnerTextAsync("text=/.+個讚/", new PageInnerTextOptions { Timeout = 1000 });
                 }
@@ -102,7 +104,6 @@ namespace EverrichFakeCrawler.Services
                 }
 
                 result[i].LikeCount = LikeCountParse(likeCount);
-                result[i].Hyperlink = page.Url;
             }
 
             await _playWrightService.ClosePage();
@@ -121,6 +122,21 @@ namespace EverrichFakeCrawler.Services
                 .Replace("人", "")
                 .Replace(" ", "")
                 .Trim();
+        }
+        private string UrlParse(string url)
+        {
+            var regex = new Regex("&eav=.+");
+
+            return regex.Replace(url, "").Trim();
+        }
+
+        private string GetHrefEvalString(string keyword)
+        {
+            return $"[...document.querySelectorAll('table tr td:nth-child(2) a')].filter(x=>x.innerText.replaceAll(' ','').toLowerCase().includes('{keyword.ToLower()}')).map(x=>x.href)";
+        }
+        private string GetNameEvalString(string keyword)
+        {
+            return $"[...document.querySelectorAll('table tr td:nth-child(2) a div div')].filter(x => x.innerText.replaceAll(' ','').toLowerCase().includes('{keyword.ToLower()}')).map(x => x.innerText)";
         }
         private async Task<T> GetJsonElement<T>(IPage page, string eval)
         {

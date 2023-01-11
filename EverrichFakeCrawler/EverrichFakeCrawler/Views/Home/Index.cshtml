@@ -3,8 +3,11 @@
 }
 <div id="app" class="tab-wrapper">
     <el-card :body-style="cardStyle">
-        <el-form :model="addForm" status-icon ref="addForm">
+        <el-form :model="addForm" :rules="rules" status-icon ref="addForm">
             <h1 class="title fadeInDown">昇恆昌反詐騙</h1>
+            <el-form-item class="d-flex jcc" label="搜尋" prop="keyword">
+                <el-input v-model="addForm.keyword" placeholder="關鍵字" clearable></el-input>
+            </el-form-item>
             <el-form-item class="d-flex jcc" label="帳號" prop="accountId">
                 <el-input v-model="addForm.accountId" placeholder="FB帳號" clearable></el-input>
             </el-form-item>
@@ -21,17 +24,43 @@
 
 @section Scripts{
     <script>
+        const validate = (rule, value, callback) => {
+            if (value === '') {
+                callback(new Error('不可為空值'));
+            } else {
+                callback();
+            }
+        }
+
         const data = {
             cardStyle: { 'background-color': '#e4e7ed' },
             addForm: {
+                keyword: '',
                 accountId: '',
                 password: '',
                 reLogin: true,
+            },
+
+            rules: {
+                keyword: [{ validator: validate, trigger: 'blur' }],
+                accountId: [{ validator: validate, trigger: 'blur' }],
+                password: [{ validator: validate, trigger: 'blur' }]
             }
         }
 
         const methods = {
             doCrawler() {
+                var formName = 'addForm'
+                this.$refs[formName].validate((valid) => {
+                    if (!valid) {
+                        this.showError('新增失敗');
+                        return false;
+                    }
+                    this.saveLocalStorage();
+                    this.PostCrawler();
+                });
+            },
+            PostCrawler() {
                 axios({
                     url: '/Crawler',
                     method: 'Post',
@@ -63,6 +92,7 @@
                 }
                 localStorage.setItem('crawler_account', this.addForm.accountId)
                 localStorage.setItem('crawler_password', this.addForm.password)
+                localStorage.setItem('crawler_keyword', this.addForm.keyword)
             },
             showSuccess(message) {
                 this.$message({
@@ -77,6 +107,7 @@
         const mounted = function() {
             this.addForm.accountId = localStorage.crawler_account ?? ''
             this.addForm.password = localStorage.crawler_password ?? ''
+            this.addForm.keyword = localStorage.crawler_keyword ?? ''
         }
         const vue = {
             el: '#app',
