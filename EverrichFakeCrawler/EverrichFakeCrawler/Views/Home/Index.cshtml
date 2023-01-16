@@ -1,5 +1,5 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "昇恆昌反詐騙";
 }
 <div id="app" class="tab-wrapper">
     <el-card :body-style="cardStyle">
@@ -14,13 +14,12 @@
             <el-form-item class="d-flex jcc" label="密碼" prop="password">
                 <el-input v-model="addForm.password" show-password placeholder="FB密碼"></el-input>
             </el-form-item>
-            <el-form-item class="text-center">
-                <el-button id="doCrawlerButton" class="btn add-btn" type="primary" @@click="doCrawler()">開始爬取</el-button>
+            <el-form-item class="text-center mt-2">
+                <el-button id="doCrawlerButton" class="btn" type="primary" @@click="doCrawler()">開始爬取</el-button>
             </el-form-item>
         </el-form>
     </el-card>
 </div>
-
 
 @section Scripts{
     <script>
