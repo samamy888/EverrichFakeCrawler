@@ -51,7 +51,7 @@ Task.Run(async () =>
     new BrowserWindowOptions
     {
         Title = "ª@«í©÷¤Ï¶BÄF",
-        Height = 500
+        Height = 800
     });
 });
 

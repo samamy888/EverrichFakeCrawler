@@ -39,6 +39,7 @@ namespace EverrichFakeCrawler.Services
                     await page.Locator("#email").FillAsync(request.AccountId);
                     await page.Locator("#pass").FillAsync(request.Password);
                     await page.Locator("#loginbutton").ClickAsync();
+                    await page.WaitForTimeoutAsync(1000);
                 }
                 catch (Exception ex)
                 {
@@ -46,8 +47,9 @@ namespace EverrichFakeCrawler.Services
                     return new List<CrawlerModel>();
                 }
             }
-            //如果目前的URL還是要登入代表失敗
+            await Task.Delay(1000);
             var nowUrl = page.Url;
+            //如果目前的URL還是要登入代表失敗
             if (nowUrl.ToLower().Contains("login"))
             {
                 _logger.LogError($"登入失敗");
@@ -64,6 +66,9 @@ namespace EverrichFakeCrawler.Services
                 var nameData = await GetJsonElement<List<string>>(page, nameEval);
 
                 if (hrefData.Count == 0)
+                    break;
+
+                if (nameData.Count == 0)
                     break;
 
                 for (var i = 0; i < nameData.Count; i++)
@@ -109,12 +114,16 @@ namespace EverrichFakeCrawler.Services
             await _playWrightService.ClosePage();
 
             //按讚數排序
-            result = result.OrderBy(x => Decimal.Parse(x.LikeCount.Replace(",", ""))).ToList();
+            if(result.Count > 0)
+            {
+                result = result.OrderBy(x => Decimal.Parse(x.LikeCount.Replace(",", ""))).ToList();
+            }
             return result;
         }
         private string LikeCountParse(string count)
         {
-            return count
+            var regex = new Regex("，.+");
+            return regex.Replace(count, string.Empty)
                 .Replace("說這讚", "")
                 .Replace("說讚", "")
                 .Replace("個讚", "")
@@ -126,8 +135,7 @@ namespace EverrichFakeCrawler.Services
         private string UrlParse(string url)
         {
             var regex = new Regex("&eav=.+");
-
-            return regex.Replace(url, "").Trim();
+            return regex.Replace(url, string.Empty).Trim();
         }
 
         private string GetHrefEvalString(string keyword)
